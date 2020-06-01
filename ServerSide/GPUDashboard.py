@@ -17,15 +17,14 @@ nvmlClocksThrottleReasonHwThermalSlowdown         = 0x0000000000000040
 nvmlClocksThrottleReasonHwPowerBrakeSlowdown      = 0x0000000000000080
 nvmlClocksThrottleReasonDisplayClockSetting       = 0x0000000000000100
 
-
 throttleByThermalOrPowerBrakeSlowdown = nvmlClocksThrottleReasonHwSlowdown | \
                                          nvmlClocksThrottleReasonSwThermalSlowdown | \
                                          nvmlClocksThrottleReasonHwPowerBrakeSlowdown| \
                                          nvmlClocksThrottleReasonHwThermalSlowdown
 def getGPUInfo():
     propertyNames = ['power.draw','utilization.gpu','fan.speed','temperature.gpu','name','index',
-                     'memory.total','memory.used','throttled', 'clocks.gr', 'uuid','']
-    GPUInfoTEXT = sp.check_output('nvidia-smi  --format=csv,noheader --query-gpu=power.draw,utilization.gpu,fan.speed,temperature.gpu,name,index,memory.total,memory.used,clocks_throttle_reasons.active,clocks.gr,uuid',shell=True).decode()
+                     'memory.total','memory.used','throttled', 'clocks.gr', 'uuid','pstate']
+    GPUInfoTEXT = sp.check_output('nvidia-smi  --format=csv,noheader --query-gpu=power.draw,utilization.gpu,fan.speed,temperature.gpu,name,index,memory.total,memory.used,clocks_throttle_reasons.active,clocks.gr,uuid,pstate',shell=True).decode()
     GPUInfos = {}
     for info in GPUInfoTEXT.split('\n'):
         if info:
@@ -145,7 +144,7 @@ class GPU(object):
         return self.memoryUsed*100 / self.memoryTotal
     @property
     def memoryFree(self):
-        return self.memoryTotal - self.memoryUsed
+        return self.memoryTotal - self.memoryUsed  
     @property
     def temperature(self):
         return self._temperature
@@ -242,10 +241,12 @@ class GPUDashboard(object):
             users= ','.join(gpu.users) if gpu.users else ''
             memoryUsage = int(gpu.memoryUsagePercentage)
             memoryFree = int(gpu.memoryFree)
+            pstate = sp.check_output('nvidia-smi  --format=csv,noheader --query-gpu=pstate',shell=True).decode()
+            pstate = pstate[0] + pstate[1]
             out[gpu.uuid[-17:]] = {'Fan':fanSpeed,'GPUID':gpu.index,'Name':gpu.name,
               'Power':gpu.powerDraw,'Processes':processes,'Temperature':gpu.temperature,
               'Users':users,'Utilization':gpu.utilization,'MemoryUsage':memoryUsage,
               'MemoryFree':memoryFree,'throttled':gpu.throttled,'Clock':gpu.clockSpeed,
-              'logDateTime':logDateTime }
+              'logDateTime':logDateTime,'Pstate': pstate}
         return out
         
