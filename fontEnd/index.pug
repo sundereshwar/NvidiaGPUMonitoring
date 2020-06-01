@@ -1,0 +1,54 @@
+html
+  header
+    link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
+    link(rel="stylesheet" href="./index.css")
+  body
+    div.navbar
+      
+    div.main#monitor
+      monitorctn(v-bind:info="info" v-for="info in infos")
+
+
+  template#cardInfoContainer
+    .cardInfoContainer
+      .disconect-cover( v-bind:class="{ hidden: !info.disconnect }")
+        i.material-icons.label(title="Disconnect") link_off
+      .title {{info.server}}:{{info.GPUID}}
+      .GPUPersent
+        .lock-cover-container(v-bind:class="{ hidden: !info.throttled }")
+          i.material-icons.label(title="The clock speed of the GPU card could be throttled due to thermal or power limits.") lock
+        .inerCircle1( v-bind:style="utilizationStyle")
+        .inerCircle2( v-bind:style="styleobj")
+        .inerCircleCover
+        .cover-text(:title='clockspeed') {{info.Utilization}}%
+      .GPUInfo
+        .gpu-name {{info.Name}}
+        div.info-container 
+          i.material-icons.label(title="Power") &#xE3E7;
+          .value-containe {{info.Power}} W
+        div.info-container
+          i.material-icons.label(title="Temperature") &#xE80E;
+          .value-containe {{info.Temperature}} °C
+        div.info-container
+          i.material-icons.label(title="Pstate") &#xE80E;
+          .value-containe {{info.Pstate}} °C  
+        div.info-container
+          i.material-icons.label(title="Fan Speed") &#xE332;
+          .value-containe {{info.Fan}} %    
+        div.mem.info-container
+          i.material-icons.label(title="Memory Usage") memory
+          .membar-container.value-containe(:title="freeMem")  
+            .membar(v-bind:style="memusageStyle")
+            .value-container.mem-val {{info.MemoryUsage}} %
+            //- {{info.MemoryUsage}} %
+      .currentUserInfo
+        .appdata
+          i.material-icons.label(title="current users") &#xE7FD;
+          .app-value {{info.Users}}
+        .appdata
+          i.material-icons.label(title="processes") &#xE8B8;
+          .app-value(v-bind:title="info.Processes") {{info.Processes}}
+  script(src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.min.js')
+  script(src="https://www.gstatic.com/firebasejs/5.0.4/firebase-app.js")
+  script(src="https://www.gstatic.com/firebasejs/5.0.4/firebase-database.js")
+  script(src='./index.js')
